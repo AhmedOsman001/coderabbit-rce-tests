@@ -1,0 +1,2 @@
+This is a test file for SSRF via tool config paths.
+The .coderabbit.yaml now points tool config files to external URLs.
